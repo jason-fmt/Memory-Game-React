@@ -1,17 +1,16 @@
+import { decodeEntity } from "html-entities"
 
 // handleClick function prop is passed down from App.jsx
 
-const MemoryCard = ({ handleClick }) => {
-	const emojiArray = ['🐶','🐷','🐙','🐛','🐵','🐶','🐷','🐙','🐛','🐵']
-
+const MemoryCard = ({ data, handleClick }) => {
    // Stores list of buttons containing an emoji from the emojiArray
-	const emojiElements = emojiArray.map((emoji, index) => (
+	const emojiElements = data.map((emojiObj, index) => (
 		<li key={index} className='card-item'>
 			<button 
             className='btn btn--emoji' 
             onClick={handleClick}
          >
-				{emoji}
+				{decodeEntity(emojiObj.htmlCode[0])}
 			</button>
 		</li>
 	))
