@@ -4,12 +4,28 @@ import MemoryCard from './components/MemoryCard'
 
 const App = () => {
 	const [isGameOn, setIsGameOn] = useState(false)
+   const [emojisData, setEmojisData] = useState([])
 
-	function startGame(e) {
+	async function startGame(e) {
 		e.preventDefault() // Prevents auto refresh
-		setIsGameOn(true)
+
+      try {
+         const response = await fetch(`https://emojihub.yurace.pro/api/all/category/animals-and-nature`)
+
+         if(!response.ok) {
+            throw new Error('Could not fetch data from API')
+         }
+
+         const data = await response.json()
+         const dataSample = data.slice(0, 5)
+         
+         setEmojisData(dataSample)
+         setIsGameOn(true)
+      } catch (err) {
+         console.error(err)
+      }
 	}
-   
+
 	function turnCard() {
       console.log('Card clicked')
    }
