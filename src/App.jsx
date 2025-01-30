@@ -1,12 +1,28 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Form from './components/Form'
 import MemoryCard from './components/MemoryCard'
 
 const App = () => {
 	const [isGameOn, setIsGameOn] = useState(false)
    const [emojisData, setEmojisData] = useState([])
+   const [selectedCards, setSelectedCards] = useState([])
+   const [matchedCards, setMatchedCards] = useState([])
+   const [isGameOver, setIsGameOver] = useState(false)
 
-   
+   console.log(selectedCards)
+
+   useEffect(() => {
+      if(selectedCards.length === 2 && selectedCards[0].name === selectedCards[1].name) {
+         setMatchedCards(prevMatchedCards => [...prevMatchedCards, ...selectedCards])
+      }
+   }, [selectedCards])
+
+   useEffect(() => {
+      if(emojisData.length && emojisData.length === matchedCards.length) {
+         setIsGameOver(true)
+      }
+   }, [matchedCards])
+
 	async function startGame(e) {
       e.preventDefault() // Prevents auto refresh
       
@@ -19,8 +35,9 @@ const App = () => {
          
          const data = await response.json()
          const dataSlice = getDataSlice(data)
+         const emojisArray = getEmojisArray(dataSlice)
          
-         setEmojisData(dataSlice)
+         setEmojisData(emojisArray)
          setIsGameOn(true)
       } catch (err) {
          console.error(err)
@@ -29,7 +46,10 @@ const App = () => {
 
    function getDataSlice(data) {
       const randomIndices = getRandomIndices(data)
-      const dataSlice = randomIndices.map(num => data[num])
+      // Map over array of random numbers
+      // Create an array containing an emoji object at that random number index
+      const dataSlice = randomIndices.map(index => data[index])
+
       return dataSlice
    }
    
@@ -53,15 +73,44 @@ const App = () => {
       return randomIndicesArray
    }
 
-	function turnCard() {
-      console.log('Card clicked')
+   function getEmojisArray(data) {
+      const pairedEmojisArray = [...data, ...data]
+
+      for(let i = pairedEmojisArray.length - 1; i > 0; i--) {
+         const j = Math.floor(Math.random() * (i + 1))
+         const temp = pairedEmojisArray[i]
+         pairedEmojisArray[i] = pairedEmojisArray[j]
+         pairedEmojisArray[j] = temp
+       }
+
+      // Return an array containing each element twice
+      return pairedEmojisArray
+   }
+
+	function turnCard(name, index) {
+      // Check if clicked card is in selectedCards array
+      const selectedCardEntry = selectedCards.find(emoji => emoji.index === index)
+
+      if(!selectedCardEntry && selectedCards.length < 2) {
+         setSelectedCards(prevSelectedCards => ([
+            ...prevSelectedCards,
+            { name, index }
+         ]))
+      } else if(!selectedCardEntry && selectedCards.length === 2){
+         setSelectedCards([{ name, index }])
+      }
    }
 
 	return (
 		<main>
 			<h1>Memory</h1>
 			{!isGameOn && <Form handleSubmit={startGame} />}
-			{isGameOn && <MemoryCard data={emojisData} handleClick={turnCard} />}
+			{isGameOn && <MemoryCard 
+            data={emojisData} 
+            handleClick={turnCard} 
+            selectedCards={selectedCards}
+            matchedCards={matchedCards}
+         />}
 		</main>
 	)
 }
