@@ -8,7 +8,7 @@ const MemoryCard = ({ data, handleClick }) => {
 		<li key={index} className='card-item'>
 			<button 
             className='btn btn--emoji' 
-            onClick={handleClick}
+            onClick={() => handleClick(emojiObj.name, index)}
          >
 				{decodeEntity(emojiObj.htmlCode[0])}
 			</button>
