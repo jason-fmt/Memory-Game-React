@@ -1,10 +1,19 @@
-const EmojiButton = ({ content, style, handleClick }) => {
+const EmojiButton = ({ content, handleClick, isSelected, isMatched }) => {
+	const btnContent = isSelected || isMatched ? content : '?'
+
+	const btnStyle = 
+		isMatched ? 'btn--emoji__back--matched' : 
+		isSelected ? 'btn--emoji__back--selected': 
+		'btn--emoji__front'
+
+
 	return (
 		<button
-			className={style}
-			onClick={handleClick}
+			className={`btn btn--emoji ${btnStyle}`}
+			onClick={isSelected ? null : handleClick}
+			disabled={isMatched}
 		>
-			{content}
+			{btnContent}
 		</button>
 	)
 }
