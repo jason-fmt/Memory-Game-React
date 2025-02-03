@@ -1,13 +1,21 @@
 import { useEffect, useState } from 'react'
 import Form from './components/Form'
 import MemoryCard from './components/MemoryCard'
+import GameOver from './components/GameOver'
+import ErrorCard from './components/ErrorCard'
 
 const App = () => {
+   const initialFormData = { category: 'animals-and-nature', number: 10 }
+
 	const [isGameOn, setIsGameOn] = useState(false)
    const [emojisData, setEmojisData] = useState([])
    const [selectedCards, setSelectedCards] = useState([])
    const [matchedCards, setMatchedCards] = useState([])
-   const [isGameOver, setIsGameOver] = useState(false)
+   const [areAllCardsMatched, setAreAllCardsMatched] = useState(false)
+   const [isError, setIsError] = useState(false)
+   const [formData, setFormData] = useState(() => initialFormData)
+
+   // console.log(isError)
 
    useEffect(() => {
       if(selectedCards.length === 2 && selectedCards[0].name === selectedCards[1].name) {
@@ -17,7 +25,7 @@ const App = () => {
 
    useEffect(() => {
       if(emojisData.length && emojisData.length === matchedCards.length) {
-         setIsGameOver(true)
+         setAreAllCardsMatched(true)
       }
    }, [matchedCards])
 
@@ -25,7 +33,8 @@ const App = () => {
       e.preventDefault() // Prevents auto refresh
       
       try {
-         const response = await fetch(`https://emojihub.yurace.pro/api/all/category/animals-and-nature`)
+         // throw new Error('Error in try block.')
+         const response = await fetch(`https://emojihub.yurace.pro/api/all/category/${formData.category}`)
          
          if(!response.ok) {
             throw new Error('Could not fetch data from API')
@@ -39,6 +48,7 @@ const App = () => {
          setIsGameOn(true)
       } catch (err) {
          console.error(err)
+         setIsError(true)
       }
 	}
 
@@ -55,7 +65,7 @@ const App = () => {
       const randomIndicesArray = []
 
       // Generate 5 UNIQUE numbers
-      for(let i = 0; i < 5; i++) {
+      for(let i = 0; i < formData.number / 2; i++) {
          const randomNum = Math.floor(Math.random() * data.length)
 
          // If the number is NOT in the array, add it 
@@ -96,16 +106,29 @@ const App = () => {
       }
    }
 
+   function resetGame() {
+      setIsGameOn(false)
+      setSelectedCards([])
+      setMatchedCards([])
+      setAreAllCardsMatched(false)
+   }
+
+   function resetError() {
+      setIsError(false)
+   }
+
 	return (
 		<main>
 			<h1>Memory</h1>
-			{!isGameOn && <Form handleSubmit={startGame} />}
+			{!isError && !isGameOn && <Form handleSubmit={startGame} />}
+         {areAllCardsMatched && <GameOver handleClick={resetGame}/>}
 			{isGameOn && <MemoryCard 
             data={emojisData} 
             handleClick={turnCard} 
             selectedCards={selectedCards}
             matchedCards={matchedCards}
          />}
+         {isError && <ErrorCard handleClick={resetError}/>}
 		</main>
 	)
 }
