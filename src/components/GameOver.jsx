@@ -11,7 +11,7 @@ const GameOver = ({ handleClick }) => {
    return (
       <div className="wrapper wrapper--accent" ref={cardRef} tabIndex={-1}>
          <p className="p--large">
-            You've mathced all the memory cards!
+            You've matched all the memory cards!
          </p>
          <RegularButton handleClick={handleClick}>
             Play  Again
